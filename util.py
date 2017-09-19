@@ -46,12 +46,16 @@ def plot_image(image):
     plt.imshow(image)
     plt.show()
 
-def crop_skill_1(image, size):
+def rect_skill_1(image):
     w = image.shape[0]
     h = image.shape[1]
     y1 = int(w * 385 / 480)
     y2 = int(w * 455 / 480)
     x1 = int(h * 600 / 848)
     x2 = int(h * 670 / 848)
+    return x1, y1, x2, y2
+
+def crop_skill_1(image, size):
+    x1, y1, x2, y2 = rect_skill_1(image)
     image = image[y1:y2, x1:x2]
     return cv2.resize(image, size)

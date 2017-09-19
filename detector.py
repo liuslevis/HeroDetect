@@ -135,6 +135,13 @@ class HeroDetect(object):
     def predict(self, X):
         return self.model.predict(X)
 
+    def predict_image(self, image):
+        y = self.model.predict(np.array([image]))[0]
+        return sorted(zip(self.labels, y), reverse=True, key=lambda x:x[1])[0]
+
+    def predict_frame(self, frame):
+        return self.predict_image(util.crop_skill_1(frame, self.image_size))
+
     def print_test_result(self, test_dir, verbose=False):
         paths = self.read_image_paths(test_dir)
         X = self.prep_X(paths)
@@ -154,8 +161,7 @@ class HeroDetect(object):
         acc = hit / n
         print('acc: {} @ {}'.format(acc, test_dir))
 
-input_size = (50, 50)
-input_shape = (*input_size, 3)
+input_shape = (50, 50, 3)
 test_dir = './data/input/test_small'
 train_dir = './data/input/train_small'
 
@@ -189,7 +195,7 @@ def test():
         model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
         label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
 
-    heroDetect.print_test_result(test_dir, verbose=False)
+    heroDetect.print_test_result(test_dir, verbose=True)
 
 if __name__ == '__main__':
     train()
