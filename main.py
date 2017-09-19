@@ -95,7 +95,6 @@ class HeroDetect(object):
 
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
-
         labels = self.create_labels(train_dir, self.label_path)
         n_labels = len(labels)
         paths = self.read_image_paths(train_dir)
@@ -133,6 +132,7 @@ class HeroDetect(object):
                 # ModelCheckpoint(self.checkpoint_path, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=1),
                 LossHistory(),
             ])
+
         self.model.save(self.model_path)
 
         util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
@@ -154,14 +154,14 @@ class HeroDetect(object):
 
 input_size = (50, 50)
 input_shape = (*input_size, 3)
-test_dir = './data/input/test_tiny'
-train_dir = './data/input/train_tiny'
-epochs = 10
-batch_size = 50
+test_dir = './data/input/test_small'
+train_dir = './data/input/train_small'
+epochs = 100
+batch_size = 250
 
 def train():
     for model_init in [\
-        # model.cnn_6_layer,
+        model.cnn_6_layer,
         model.cnn_10_layer, 
         # model.cnn_13_layer, 
         # model.cnn_13_layer_dropout, 
@@ -170,10 +170,9 @@ def train():
         # model.cnn_vgg_dropout,
         ]:
         for i in range(1):
-            ver = 'v2.iter{}.{}'.format(i, model_init.__name__)
             heroDetect = HeroDetect(input_shape=input_shape)
             heroDetect.train(
-                ver=ver,
+                ver='v2.iter{}.{}'.format(i, model_init.__name__), 
                 train_dir=train_dir,
                 model_init=model_init, 
                 epochs=epochs, 
@@ -182,8 +181,8 @@ def train():
 def test():
     heroDetect = HeroDetect(input_shape=input_shape)
     heroDetect.load_model(
-        model_path='./data/output/v2.model.h5', 
-        label_path='./data/output/v2.label.txt')
+        model_path='./data/output/v2.iter0.cnn_6_layer.model.h5', 
+        label_path='./data/output/v2.iter0.cnn_6_layer.label.txt')
 
     paths = heroDetect.read_image_paths(test_dir)
     X = heroDetect.prep_X(paths, need_crop=False)
@@ -191,5 +190,5 @@ def test():
     heroDetect.print_result(X, y, test_dir)
 
 if __name__ == '__main__':
-    train()
-    # test()
+    # train()
+    test()
