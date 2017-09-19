@@ -44,11 +44,13 @@ def gen_train(video_path, train_dir):
             # break
 
 def main():
-    for root_dir, sub_dirs, files in os.walk('./data/raw/'):
+    input_dir = './data/raw_test/' 
+    output_dir = './data/input/test/'
+    for root_dir, sub_dirs, files in os.walk(input_dir):
         for file in files:
             if '.mp4' in file:
                 video_path = root_dir + '/' + file
-                train_dir = './data/input/train/' + os.path.basename(root_dir)
+                train_dir = output_dir + os.path.basename(root_dir)
                 print('processing', video_path, '->', train_dir)
                 gen_train(video_path, train_dir)
 
