@@ -144,25 +144,28 @@ class HeroDetect(object):
     def predict(self, X):
         return self.model.predict(X)
 
-    def print_test_result(self, test_dir):
+    def print_test_result(self, test_dir, verbose=False):
         paths = self.read_image_paths(test_dir)
         X = self.prep_X(paths)
         y = self.predict(X)
         n = len(paths)
         hit = 0
+        assert n > 0
         assert len(paths) == len(X) == len(y)
         for i in range(n):
             topN = sorted(zip(self.labels, y[i]), reverse=True, key=lambda x:x[1])[:1]
             for label, prob in topN:
                 if label in paths[i]:
                     hit += 1
+            if verbose:
+                print('/'.join(paths[i].split('/')[-2:]), 'predict', topN)
+                
         acc = hit / n
-        print('acc: {} on {}'.format(acc, test_dir))
-
+        print('acc: {} @ {}'.format(acc, test_dir))
 
 input_size = (50, 50)
 input_shape = (*input_size, 3)
-test_dir = './data/input/test'
+test_dir = './data/input/test_small'
 train_dir = './data/input/train'
 epochs = 100
 batch_size = 256
@@ -173,7 +176,7 @@ def train():
         # model.cnn_10_layer, 
         # model.cnn_13_layer, 
         # model.cnn_13_layer_dropout, 
-        model.cnn_15_layer,
+        # model.cnn_15_layer,
         # model.cnn_vgg,
         # model.cnn_vgg_dropout,
         ]:
@@ -189,10 +192,10 @@ def train():
 def test():
     heroDetect = HeroDetect(input_shape=input_shape)
     heroDetect.load_model(
-        model_path='./data/output/v2.iter0.cnn_15_layer.model.h5', 
-        label_path='./data/output/v2.iter0.cnn_15_layer.label.txt')
+        model_path='./data/output/v1.cnn_vgg_dropout.iter0.model.h5', 
+        label_path='./data/output/v1.cnn_vgg_dropout.iter0.label.txt')
 
-    heroDetect.print_test_result(test_dir)
+    heroDetect.print_test_result(test_dir, verbose=True)
 
 if __name__ == '__main__':
     train()
