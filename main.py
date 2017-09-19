@@ -80,7 +80,7 @@ class HeroDetect(object):
             if i % 1000 == 0: print('Loading image {} of {}'.format(i, n))
         return X
 
-    def train(self, ver, train_dir, valid_dir, model_init, epochs, batch_size, optimizer, data_arg):
+    def train(self, ver, train_dir, valid_dir, model_init, epochs, batch_size, optimizer, img_arg):
         self.ver = ver
         self.model_path = '{}/{}.model.h5'.format(self.output_dir, self.ver)
         self.model_json_path = '{}/{}.model.json'.format(self.output_dir, self.ver)
@@ -119,7 +119,7 @@ class HeroDetect(object):
         self.model.summary()
 
         history = None
-        if data_arg:
+        if img_arg:
             # valid_datagen = ImageDataGenerator(rescale=1.)
             # valid_generator = valid_datagen.flow_from_directory(
             #     valid_dir,
@@ -163,7 +163,7 @@ class HeroDetect(object):
         self.model.save(self.model_path)
 
         #TODO
-        if not data_arg:
+        if not img_arg:
             util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
 
     def predict(self, X):
@@ -217,7 +217,7 @@ def train():
                 epochs=epochs, 
                 batch_size=batch_size,
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
-                data_arg=True,
+                img_arg=True,
                 )
 
 def test():
