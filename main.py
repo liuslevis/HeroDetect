@@ -190,8 +190,8 @@ class HeroDetect(object):
 
 input_size = (50, 50)
 input_shape = (*input_size, 3)
-test_dir = './data/input/test_small'
-train_dir = './data/input/train'
+test_dir = './data/input/test_tiny'
+train_dir = './data/input/train_tiny'
 valid_dir = './data/input/valid'
 
 epochs = 10
@@ -201,9 +201,9 @@ def train():
     for model_init in [\
         # model.cnn_6_layer,
         # model.cnn_10_layer, 
-        # model.cnn_13_layer, 
+        model.cnn_13_layer, 
         # model.cnn_13_layer_dropout, 
-        model.cnn_15_layer,
+        # model.cnn_15_layer,
         # model.cnn_vgg,
         # model.cnn_vgg_dropout,
         ]:
