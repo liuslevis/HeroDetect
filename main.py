@@ -44,7 +44,9 @@ class HeroDetect(object):
         labels = [i for i in os.listdir(train_dir) if os.path.isdir('{}/{}'.format(train_dir, i))]
         print('label =', labels)
         with open(label_path, 'w') as f:
-            f.write('\n'.join(labels))
+            for label in labels:
+                f.write(label)
+                f.write('\n')
         return labels
 
     def read_image(self, path):
@@ -68,14 +70,13 @@ class HeroDetect(object):
             y[i] = labels.index(hero)
         return to_categorical(y)
 
-    def prep_X(self, paths, need_crop):
+    def prep_X(self, paths):
         n = len(paths)
         X = np.ndarray((n, *self.input_shape), dtype=np.uint8)
         for i, path in enumerate(paths):
             image = self.read_image(path)
-            if need_crop:
-                image = util.crop_skill_1(image, self.image_size)
-            X[i] = image if image.shape == self.input_shape else image.T
+            # image = util.crop_skill_1(image, self.image_size)
+            X[i] = image #if image.shape == self.input_shape else image.T
             if i % 1000 == 0: print('Loading image {} of {}'.format(i, n))
         return X
 
@@ -95,8 +96,8 @@ class HeroDetect(object):
 
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
-        labels = self.create_labels(train_dir, self.label_path)
-        n_labels = len(labels)
+        self.labels = self.create_labels(train_dir, self.label_path)
+        n_labels = len(self.labels)
         paths = self.read_image_paths(train_dir)
         random.shuffle(paths)
         print(train_dir, len(paths))
@@ -105,10 +106,10 @@ class HeroDetect(object):
         train_paths = paths[:split_index]
         valid_paths = paths[split_index:]
 
-        X_train = self.prep_X(train_paths, need_crop=False)
-        X_valid = self.prep_X(valid_paths, need_crop=False)
-        y_train = self.prep_y(train_paths, labels)
-        y_valid = self.prep_y(valid_paths, labels)
+        X_train = self.prep_X(train_paths)
+        X_valid = self.prep_X(valid_paths)
+        y_train = self.prep_y(train_paths, self.labels)
+        y_valid = self.prep_y(valid_paths, self.labels)
 
         print("Train X.shape:{} y.shape:{}".format(X_train.shape, y_train.shape))
         print("Valid X.shape:{} y.shape:{}".format(X_valid.shape, y_valid.shape))
@@ -134,7 +135,7 @@ class HeroDetect(object):
             ])
 
         self.model.save(self.model_path)
-
+        print('plot_keras_history')
         util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
         # score = model.evaluate(X_valid, y_valid, verbose=0)
         # print('valid loss:', score[0])
@@ -143,29 +144,36 @@ class HeroDetect(object):
     def predict(self, X):
         return self.model.predict(X)
 
-    def print_result(self, X, y, directory):
-        paths = self.read_image_paths(directory)
-        assert len(paths) == len(X) == len(y)
+    def print_test_result(self, test_dir):
+        paths = self.read_image_paths(test_dir)
+        X = self.prep_X(paths)
+        y = self.predict(X)
         n = len(paths)
+        hit = 0
+        assert len(paths) == len(X) == len(y)
         for i in range(n):
-            topN = sorted(zip(self.labels, y[i]), key=lambda x:x[1])[:3]
-            if topN[0][1] > 1e-4:
-                print(paths[i], topN)
+            topN = sorted(zip(self.labels, y[i]), reverse=True, key=lambda x:x[1])[:1]
+            for label, prob in topN:
+                if label in paths[i]:
+                    hit += 1
+        acc = hit / n
+        print('acc: {} on {}'.format(acc, test_dir))
+
 
 input_size = (50, 50)
 input_shape = (*input_size, 3)
-test_dir = './data/input/test_small'
-train_dir = './data/input/train_small'
+test_dir = './data/input/test'
+train_dir = './data/input/train'
 epochs = 100
-batch_size = 250
+batch_size = 256
 
 def train():
     for model_init in [\
-        model.cnn_6_layer,
-        model.cnn_10_layer, 
+        # model.cnn_6_layer,
+        # model.cnn_10_layer, 
         # model.cnn_13_layer, 
         # model.cnn_13_layer_dropout, 
-        # model.cnn_15_layer,
+        model.cnn_15_layer,
         # model.cnn_vgg,
         # model.cnn_vgg_dropout,
         ]:
@@ -181,14 +189,11 @@ def train():
 def test():
     heroDetect = HeroDetect(input_shape=input_shape)
     heroDetect.load_model(
-        model_path='./data/output/v2.iter0.cnn_6_layer.model.h5', 
-        label_path='./data/output/v2.iter0.cnn_6_layer.label.txt')
+        model_path='./data/output/v2.iter0.cnn_15_layer.model.h5', 
+        label_path='./data/output/v2.iter0.cnn_15_layer.label.txt')
 
-    paths = heroDetect.read_image_paths(test_dir)
-    X = heroDetect.prep_X(paths, need_crop=False)
-    y = heroDetect.predict(X)
-    heroDetect.print_result(X, y, test_dir)
+    heroDetect.print_test_result(test_dir)
 
 if __name__ == '__main__':
-    # train()
+    train()
     test()
