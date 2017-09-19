@@ -75,12 +75,11 @@ class HeroDetect(object):
         X = np.ndarray((n, *self.input_shape), dtype=np.uint8)
         for i, path in enumerate(paths):
             image = self.read_image(path)
-            # image = util.crop_skill_1(image, self.image_size)
-            X[i] = image #if image.shape == self.input_shape else image.T
+            X[i] = image
             if i % 1000 == 0: print('Loading image {} of {}'.format(i, n))
         return X
 
-    def train(self, ver, train_dir, valid_dir, model_init, epochs, batch_size, optimizer, img_arg):
+    def train(self, ver, train_dir, model_init, epochs, batch_size, optimizer):
         self.ver = ver
         self.model_path = '{}/{}.model.h5'.format(self.output_dir, self.ver)
         self.model_json_path = '{}/{}.model.json'.format(self.output_dir, self.ver)
@@ -118,53 +117,20 @@ class HeroDetect(object):
 
         self.model.summary()
 
-        history = None
-        if img_arg:
-            # valid_datagen = ImageDataGenerator(rescale=1.)
-            # valid_generator = valid_datagen.flow_from_directory(
-            #     valid_dir,
-            #     target_size=self.image_size,
-            #     batch_size=batch_size,
-            #     class_mode='categorical')
-            train_datagen = ImageDataGenerator(
-                rescale=1.,
-                shear_range=0.2,
-                zoom_range=0.2,
-                horizontal_flip=False)
-            train_generator = train_datagen.flow_from_directory(
-                train_dir,
-                target_size=self.image_size,
-                batch_size=batch_size,
-                class_mode='categorical')
-
-            history = self.model.fit_generator(
-                train_generator,
-                steps_per_epoch=len(X_train) // batch_size,
-                epochs=epochs,
-                # validation_data=valid_generator,
-                # validation_steps=len(X_valid) // batch_size,
-                callbacks=[
-                    EarlyStopping(monitor='loss', min_delta=0.1, patience=3, verbose=0, mode='auto'),
-                    LossHistory(),
-                ],
-                )
-        else:
-            history = self.model.fit(X_train, y_train,
-                batch_size=batch_size,
-                epochs=epochs,
-                verbose=1,
-                validation_data=(X_valid, y_valid),
-                callbacks=[
-                    EarlyStopping(monitor='val_loss', min_delta=0.1, patience=3, verbose=0, mode='auto'),
-                    # ModelCheckpoint(self.checkpoint_path, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=1),
-                    LossHistory(),
-                ])
+        history = self.model.fit(X_train, y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            verbose=1,
+            validation_data=(X_valid, y_valid),
+            callbacks=[
+                EarlyStopping(monitor='val_loss', min_delta=0.1, patience=3, verbose=0, mode='auto'),
+                # ModelCheckpoint(self.checkpoint_path, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=1),
+                LossHistory(),
+            ])
 
         self.model.save(self.model_path)
 
-        #TODO
-        if not img_arg:
-            util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
+        util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
 
     def predict(self, X):
         return self.model.predict(X)
@@ -190,9 +156,8 @@ class HeroDetect(object):
 
 input_size = (50, 50)
 input_shape = (*input_size, 3)
-test_dir = './data/input/test_tiny'
-train_dir = './data/input/train_tiny'
-valid_dir = './data/input/valid'
+test_dir = './data/input/test_small'
+train_dir = './data/input/train_small'
 
 epochs = 10
 batch_size = 50
@@ -201,7 +166,7 @@ def train():
     for model_init in [\
         # model.cnn_6_layer,
         # model.cnn_10_layer, 
-        model.cnn_13_layer, 
+        # model.cnn_13_layer, 
         # model.cnn_13_layer_dropout, 
         # model.cnn_15_layer,
         # model.cnn_vgg,
@@ -210,21 +175,19 @@ def train():
         for i in range(1):
             heroDetect = HeroDetect(input_shape=input_shape)
             heroDetect.train(
-                ver='v2.iter{}.{}'.format(i, model_init.__name__), 
+                ver='v2.{}.iter{}'.format(model_init.__name__, i), 
                 train_dir=train_dir,
-                valid_dir=valid_dir,
                 model_init=model_init, 
                 epochs=epochs, 
                 batch_size=batch_size,
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
-                img_arg=True,
                 )
 
 def test():
     heroDetect = HeroDetect(input_shape=input_shape)
     heroDetect.load_model(
-        model_path='./data/output/v1.cnn_vgg_dropout.iter0.model.h5', 
-        label_path='./data/output/v1.cnn_vgg_dropout.iter0.label.txt')
+        model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
+        label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
 
     heroDetect.print_test_result(test_dir, verbose=False)
 
