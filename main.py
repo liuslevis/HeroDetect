@@ -190,9 +190,9 @@ class HeroDetect(object):
 
 input_size = (50, 50)
 input_shape = (*input_size, 3)
-test_dir = './data/input/test_tiny'
-train_dir = './data/input/train_tiny'
-valid_dir = './data/input/valid_tiny'
+test_dir = './data/input/test_small'
+train_dir = './data/input/train'
+valid_dir = './data/input/valid'
 
 epochs = 2
 batch_size = 50
