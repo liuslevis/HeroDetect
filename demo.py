@@ -11,7 +11,9 @@ heroDetect.load_model(
     model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
     label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
 
-cap = cv2.VideoCapture('./data/raw_test/ake/t0530k7xavm.p712.1.mp4')
+input_path = 'data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
+# input_path = './data/raw_test/ake/t0530k7xavm.p712.1.mp4'
+cap = cv2.VideoCapture(input_path)
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
