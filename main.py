@@ -192,7 +192,7 @@ input_size = (50, 50)
 input_shape = (*input_size, 3)
 test_dir = './data/input/test_tiny'
 train_dir = './data/input/train_tiny'
-valid_dir='./data/input/valid_tiny'
+valid_dir = './data/input/valid_tiny'
 
 epochs = 2
 batch_size = 50
@@ -212,7 +212,7 @@ def train():
             heroDetect.train(
                 ver='v2.iter{}.{}'.format(i, model_init.__name__), 
                 train_dir=train_dir,
-                valid_dir=train_dir,
+                valid_dir=valid_dir,
                 model_init=model_init, 
                 epochs=epochs, 
                 batch_size=batch_size,
