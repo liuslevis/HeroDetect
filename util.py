@@ -4,14 +4,13 @@ from sys import platform
 def plot_keras_history(history, plot_path, log_path, model_json_path, model):
     log_path = log_path.replace('detail.txt', 'acc{0:.2f}.txt'.format(history.history['acc'][-1]))
     with open(log_path, 'w') as f:
-        f.write('\nval_acc:')
-        f.write(str(history.history['val_acc']))
-        f.write('\nacc=')
-        f.write(str(history.history['acc']))
-        f.write('\nval_loss=')
-        f.write(str(history.history['val_loss']))
-        f.write('\nloss=')
-        f.write(str(history.history['loss']))
+        for key in ['val_acc', 'acc', 'val_loss', 'loss']:
+            try:
+                f.write('\n{}='.format(key))
+                f.write(str(history.history[key]))
+            except Exception as e:
+                pass
+
 
     # with open(model_json_path, 'w') as f:
         # f.write(model.to_json())
