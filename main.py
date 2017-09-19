@@ -194,8 +194,8 @@ test_dir = './data/input/test_small'
 train_dir = './data/input/train'
 valid_dir = './data/input/valid'
 
-epochs = 2
-batch_size = 50
+epochs = 10
+batch_size = 250
 
 def train():
     for model_init in [\
