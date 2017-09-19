@@ -199,11 +199,11 @@ batch_size = 50
 
 def train():
     for model_init in [\
-        model.cnn_6_layer,
+        # model.cnn_6_layer,
         # model.cnn_10_layer, 
         # model.cnn_13_layer, 
         # model.cnn_13_layer_dropout, 
-        # model.cnn_15_layer,
+        model.cnn_15_layer,
         # model.cnn_vgg,
         # model.cnn_vgg_dropout,
         ]:
