@@ -551,8 +551,8 @@ def train():
     for model_init in [\
         Model.cnn_5_layer,
         Model.cnn_7_layer,
-        # Model.cnn_10_layer, 
-        # Model.cnn_13_layer, 
+        Model.cnn_10_layer, 
+        Model.cnn_13_layer, 
         # Model.cnn_13_layer_dropout, 
         # Model.cnn_15_layer,
         # Model.cnn_vgg,
@@ -562,10 +562,10 @@ def train():
             heroDetect = HeroDetect(input_shape=(50, 50, 3))
             heroDetect.train(
                 ver='v2.{}.iter{}'.format(model_init.__name__, i), 
-                train_dir='./data/input/train_small',
+                train_dir='./data/input/train',
                 model_init=model_init, 
-                epochs=1, 
-                batch_size=50,
+                epochs=100, 
+                batch_size=250,
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
                 )
 
