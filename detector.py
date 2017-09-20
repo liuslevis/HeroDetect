@@ -3,16 +3,13 @@ import os
 import random
 import numpy as np
 import cv2
+from sys import platform
 
 import keras
 from keras.models import Sequential
 from keras.layers import Input, Dropout, Flatten, MaxPooling2D, Dense, Activation, Conv2D
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.preprocessing.image import ImageDataGenerator
 from keras.utils.np_utils import to_categorical
-
-import util
-import model
 
 class LossHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -20,6 +17,344 @@ class LossHistory(keras.callbacks.Callback):
 
     def on_batch_end(self, batch, logs={}):
         self.losses.append(logs.get('loss'))
+
+        
+class Util(object):
+    def plot_keras_history(history, plot_path, log_path, model_json_path, model):
+        log_path = log_path.replace('detail.txt', 'acc{0:.2f}.txt'.format(history.history['acc'][-1]))
+        with open(log_path, 'w') as f:
+            for key in ['val_acc', 'acc', 'val_loss', 'loss']:
+                try:
+                    f.write('\n{}='.format(key))
+                    f.write(str(history.history[key]))
+                except Exception as e:
+                    pass
+        if platform == "linux":
+            return
+        import matplotlib.pyplot as plt
+        # TODO make it avalable on linux
+        # summarize history for accuracy
+        fig = plt.figure()
+        fig.add_subplot(2,2,1)
+        plt.plot(history.history['acc'])
+        plt.plot(history.history['val_acc'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+
+        # summarize history for loss
+        fig.add_subplot(2,2,2)
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.savefig(plot_path)
+
+    def plot_image(image):
+        if platform == "linux":
+            return
+        import matplotlib.pyplot as plt
+        plt.imshow(image)
+        plt.show()
+
+    def rect_skill_1(image):
+        w = image.shape[0]
+        h = image.shape[1]
+        y1 = int(w * 385 / 480)
+        y2 = int(w * 455 / 480)
+        x1 = int(h * 600 / 848)
+        x2 = int(h * 670 / 848)
+        return x1, y1, x2, y2
+
+    def crop_skill_1(image, size):
+        x1, y1, x2, y2 = Util.rect_skill_1(image)
+        image = image[y1:y2, x1:x2]
+        return cv2.resize(image, size)
+
+
+class Model(object):
+    def cnn_6_layer(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_10_layer(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_13_layer(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_13_layer(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_13_layer_dropout(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_15_layer(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(4096))
+        model.add(Activation('relu'))
+
+        model.add(Dense(4096))
+        model.add(Activation('relu'))
+
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_vgg(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(4096))
+        model.add(Activation('relu'))
+
+        model.add(Dense(4096))
+        model.add(Activation('relu'))
+
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_vgg_dropout(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(4096))
+        model.add(Dropout(0.5))
+        model.add(Activation('relu'))
+
+        model.add(Dense(4096))
+        model.add(Dropout(0.5))
+        model.add(Activation('relu'))
+
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
 
 class HeroDetect(object):
     """docstring for HeroDetect"""
@@ -130,7 +465,7 @@ class HeroDetect(object):
 
         self.model.save(self.model_path)
 
-        util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
+        Util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
 
     def predict(self, X):
         return self.model.predict(X)
@@ -140,8 +475,38 @@ class HeroDetect(object):
         return sorted(zip(self.labels, y), reverse=True, key=lambda x:x[1])[0]
 
     def predict_frame(self, frame):
-        return self.predict_image(util.crop_skill_1(frame, self.image_size))
+        return self.predict_image(Util.crop_skill_1(frame, self.image_size))
 
+    def predict_video(self, video_path):
+        cap = cv2.VideoCapture(video_path)
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        total_sec = int(frame_count / fps)
+        count = 0
+        key = None
+        predicts = []
+        while True and key != 120:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            # predict ervery 100 second
+            count += 1
+            if count % 100 * fps == 0:
+                predict = self.predict_frame(frame)
+                predicts.append(predict)
+        cap.release()
+        def reduce_predicts(predicts):
+            d = {} # {label:prob}
+            all_prob = 0
+            for label, prob in predicts:
+                all_prob += prob
+                if label in d:
+                    d[label] += prob
+                else:
+                    d[label] = prob
+            return [(k, d[k] / all_prob) for k in sorted(d, key=d.get, reverse=True)]
+        return reduce_predicts(predicts)
+        
     def print_test_result(self, test_dir, verbose=False):
         paths = self.read_image_paths(test_dir)
         X = self.prep_X(paths)
@@ -165,18 +530,18 @@ input_shape = (50, 50, 3)
 test_dir = './data/input/test_small'
 train_dir = './data/input/train_small'
 
-epochs = 10
+epochs = 1
 batch_size = 50
 
 def train():
     for model_init in [\
-        # model.cnn_6_layer,
-        # model.cnn_10_layer, 
-        # model.cnn_13_layer, 
-        # model.cnn_13_layer_dropout, 
-        # model.cnn_15_layer,
-        # model.cnn_vgg,
-        # model.cnn_vgg_dropout,
+        Model.cnn_6_layer,
+        # Model.cnn_10_layer, 
+        # Model.cnn_13_layer, 
+        # Model.cnn_13_layer_dropout, 
+        # Model.cnn_15_layer,
+        # Model.cnn_vgg,
+        # Model.cnn_vgg_dropout,
         ]:
         for i in range(1):
             heroDetect = HeroDetect(input_shape=input_shape)
@@ -195,8 +560,8 @@ def test():
         model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
         label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
 
-    heroDetect.print_test_result(test_dir, verbose=True)
+    # heroDetect.print_test_result(test_dir, verbose=True)
 
 if __name__ == '__main__':
     train()
-    test()
+    # test()
