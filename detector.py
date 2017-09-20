@@ -76,7 +76,28 @@ class Util(object):
 
 
 class Model(object):
-    def cnn_6_layer(input_shape, n_labels):
+    def cnn_5_layer(input_shape, n_labels):
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(256, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(512, kernel_size=3, activation='relu', border_mode='same'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+        model.add(Dense(n_labels))
+        model.add(Activation('sigmoid'))
+        return model
+
+    def cnn_7_layer(input_shape, n_labels):
         model = Sequential()
 
         model.add(Conv2D(64, kernel_size=3, activation='relu', border_mode='same', input_shape=input_shape))
@@ -528,7 +549,8 @@ class HeroDetect(object):
 
 def train():
     for model_init in [\
-        Model.cnn_6_layer,
+        Model.cnn_5_layer,
+        Model.cnn_7_layer,
         # Model.cnn_10_layer, 
         # Model.cnn_13_layer, 
         # Model.cnn_13_layer_dropout, 
