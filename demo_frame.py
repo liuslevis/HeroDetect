@@ -10,7 +10,7 @@ if __name__ == '__main__':
         model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
         label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
 
-    video_path = 'data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4' # './data/raw_test/ake/t0530k7xavm.p712.1.mp4'
+    video_path = './data/raw_test/bailishouyue/q0532r8l8bq.p712.3.mp4'
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     count = 0

@@ -2,7 +2,7 @@
 
 import os
 import cv2
-import util
+from detector import Util
 
 TRAIN_IMG_SIZE = (50, 50)
 BEGIN_SEC = 60
@@ -29,7 +29,7 @@ def gen_train(video_path, train_dir):
         if frame is None:
             break
 
-        skill_1_image = util.crop_skill_1(frame, TRAIN_IMG_SIZE)
+        skill_1_image = Util.crop_skill_1(frame, TRAIN_IMG_SIZE)
         if count % fps == 0:
             n_sec = int(count / fps)
             if BEGIN_SEC < n_sec < total_sec - END_SEC:
@@ -44,8 +44,8 @@ def gen_train(video_path, train_dir):
             # break
 
 def main():
-    input_dir = './data/raw_test/' 
-    output_dir = './data/input/test/'
+    input_dir = './data/raw'
+    output_dir = './data/input/train/'
     for root_dir, sub_dirs, files in os.walk(input_dir):
         for file in files:
             if '.mp4' in file:

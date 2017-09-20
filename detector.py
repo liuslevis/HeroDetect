@@ -489,23 +489,23 @@ class HeroDetect(object):
             ret, frame = cap.read()
             if not ret:
                 break
-            # predict ervery 100 second
+            # predict ervery 60 second
             count += 1
-            if count % 100 * fps == 0:
+            if count % 60 * fps == 0:
                 predict = self.predict_frame(frame)
                 predicts.append(predict)
         cap.release()
         def reduce_predicts(predicts):
             d = {} # {label:prob}
-            all_prob = 0
+            prob_sum = 0
             for label, prob in predicts:
-                all_prob += prob
-                if label in d:
+                if prob > 0.1:
+                    prob = 1
+                    d.setdefault(label, 0)
                     d[label] += prob
-                else:
-                    d[label] = prob
-            return [(k, d[k] / all_prob) for k in sorted(d, key=d.get, reverse=True)]
-        return reduce_predicts(predicts)
+                    prob_sum += prob
+            return [(k, d[k] / prob_sum) for k in sorted(d, key=d.get, reverse=True)]
+        return reduce_predicts(predicts) # first label
         
     def print_test_result(self, test_dir, verbose=False):
         paths = self.read_image_paths(test_dir)
@@ -526,13 +526,6 @@ class HeroDetect(object):
         acc = hit / n
         print('acc: {} @ {}'.format(acc, test_dir))
 
-input_shape = (50, 50, 3)
-test_dir = './data/input/test_small'
-train_dir = './data/input/train_small'
-
-epochs = 1
-batch_size = 50
-
 def train():
     for model_init in [\
         Model.cnn_6_layer,
@@ -544,22 +537,22 @@ def train():
         # Model.cnn_vgg_dropout,
         ]:
         for i in range(1):
-            heroDetect = HeroDetect(input_shape=input_shape)
+            heroDetect = HeroDetect(input_shape=(50, 50, 3))
             heroDetect.train(
                 ver='v2.{}.iter{}'.format(model_init.__name__, i), 
-                train_dir=train_dir,
+                train_dir='./data/input/train_small',
                 model_init=model_init, 
-                epochs=epochs, 
-                batch_size=batch_size,
+                epochs=1, 
+                batch_size=50,
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
                 )
 
 def test():
-    heroDetect = HeroDetect(input_shape=input_shape)
+    heroDetect = HeroDetect(input_shape=(50, 50, 3))
     heroDetect.load_model(
         model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
         label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
-
+    # test_dir = './data/input/test_small'
     # heroDetect.print_test_result(test_dir, verbose=True)
 
 if __name__ == '__main__':
