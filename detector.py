@@ -487,6 +487,7 @@ class HeroDetect(object):
         self.model.save(self.model_path)
 
         Util.plot_keras_history(history, self.plot_path, self.log_path, self.model_json_path, self.model) 
+        print('Train success:{}'.format(ver))
 
     def predict(self, X):
         return self.model.predict(X)
@@ -552,11 +553,11 @@ def train():
         Model.cnn_5_layer,
         Model.cnn_7_layer,
         Model.cnn_10_layer, 
-        Model.cnn_13_layer, 
-        # Model.cnn_13_layer_dropout, 
-        # Model.cnn_15_layer,
+        # Model.cnn_13_layer, 
+        Model.cnn_13_layer_dropout, 
+        Model.cnn_15_layer,
         # Model.cnn_vgg,
-        # Model.cnn_vgg_dropout,
+        Model.cnn_vgg_dropout,
         ]:
         for i in range(1):
             heroDetect = HeroDetect(input_shape=(50, 50, 3))
