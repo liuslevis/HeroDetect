@@ -573,9 +573,9 @@ def train():
 def test():
     heroDetect = HeroDetect(input_shape=(50, 50, 3))
     heroDetect.load_model(
-        model_path='./data/model/v1.cnn_vgg_dropout.iter0.model.h5',
+        model_path='./model/v1.cnn_vgg_dropout.iter0.model.h5',
         # model_path='./data/model/v1.cnn_vgg_dropout.iter0.model.h5', 
-        label_path='./data/model/v1.cnn_vgg_dropout.iter0.label.txt')
+        label_path='./model/v1.cnn_vgg_dropout.iter0.label.txt')
     test_dir = './data/input/test_small'
     heroDetect.print_test_result(test_dir, verbose=True)
 
