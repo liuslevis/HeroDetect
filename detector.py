@@ -30,7 +30,7 @@ class Util(object):
                 except Exception as e:
                     pass
         if platform == "linux":
-            return
+            pass
         import matplotlib.pyplot as plt
         # TODO make it avalable on linux
         # summarize history for accuracy
@@ -55,7 +55,7 @@ class Util(object):
 
     def plot_image(image):
         if platform == "linux":
-            return
+            pass
         import matplotlib.pyplot as plt
         plt.imshow(image)
         plt.show()
@@ -550,9 +550,9 @@ class HeroDetect(object):
 
 def train():
     for model_init in [\
-        Model.cnn_5_layer,
-        Model.cnn_7_layer,
-        Model.cnn_10_layer, 
+        # Model.cnn_5_layer,
+        # Model.cnn_7_layer,
+        # Model.cnn_10_layer, 
         # Model.cnn_13_layer, 
         Model.cnn_13_layer_dropout, 
         Model.cnn_15_layer,
@@ -566,18 +566,18 @@ def train():
                 train_dir='./data/input/train',
                 model_init=model_init, 
                 epochs=100, 
-                batch_size=250,
+                batch_size=500,
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
                 )
 
 def test():
     heroDetect = HeroDetect(input_shape=(50, 50, 3))
     heroDetect.load_model(
-        model_path='./data/output/v1.cnn_vgg.iter0.model.h5', 
-        label_path='./data/output/v1.cnn_vgg.iter0.label.txt')
-    # test_dir = './data/input/test_small'
-    # heroDetect.print_test_result(test_dir, verbose=True)
+        model_path='./data/model/v1.cnn_vgg_dropout.iter0.model.h5', 
+        label_path='./data/model/v1.cnn_vgg_dropout.iter0.label.txt')
+    test_dir = './data/input/test_small'
+    heroDetect.print_test_result(test_dir, verbose=True)
 
 if __name__ == '__main__':
-    train()
-    # test()
+    # train()
+    test()
