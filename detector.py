@@ -3,7 +3,8 @@ import os
 import random
 import numpy as np
 import cv2
-import skvideo.io
+# from skvideo.io import VideoCapture
+from cv2 import VideoCapture
 from sys import platform
 
 import keras
@@ -510,7 +511,7 @@ class HeroDetect(object):
         return self.predict_image(Util.crop_skill_1(frame, self.image_size))
 
     def predict_video(self, video_path):
-        cap = skvideo.io.VideoCapture(video_path)
+        cap = VideoCapture(video_path)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         total_sec = int(frame_count / fps)

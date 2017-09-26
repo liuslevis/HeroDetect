@@ -4,7 +4,7 @@ from detector import HeroDetect
 from detector import Util
 from collections import deque, Counter
 import cv2
-import skvideo.io
+from cv2 import VideoCapture
 
 DEBUG = False
 
@@ -18,7 +18,7 @@ heroDetect.load_model(
 # video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
 # video_path = './data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
 video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
-cap = skvideo.io.VideoCapture(video_path)
+cap = VideoCapture(video_path)
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 i_frame = 0
 debug_info_per_sec = 1
