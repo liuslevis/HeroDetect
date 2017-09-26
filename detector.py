@@ -3,6 +3,7 @@ import os
 import random
 import numpy as np
 import cv2
+import skvideo.io
 from sys import platform
 
 import keras
@@ -59,6 +60,15 @@ class Util(object):
         import matplotlib.pyplot as plt
         plt.imshow(image)
         plt.show()
+
+    def rect_kill_info(image):
+        w = image.shape[0]
+        h = image.shape[1]
+        y1 = int(w * 70 / 480)
+        y2 = int(w * 120 / 480)
+        x1 = int(h * 300 / 848)
+        x2 = int(h * 548 / 848)
+        return x1, y1, x2, y2
 
     def rect_skill_1(image):
         w = image.shape[0]
@@ -500,7 +510,7 @@ class HeroDetect(object):
         return self.predict_image(Util.crop_skill_1(frame, self.image_size))
 
     def predict_video(self, video_path):
-        cap = cv2.VideoCapture(video_path)
+        cap = skvideo.io.VideoCapture(video_path)
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         total_sec = int(frame_count / fps)

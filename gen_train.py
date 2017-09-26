@@ -3,6 +3,7 @@
 import os
 import cv2
 from detector import Util
+import skvideo.io
 
 TRAIN_IMG_SIZE = (50, 50)
 BEGIN_SEC = 60
@@ -14,7 +15,7 @@ def gen_train(video_path, train_dir):
 
     video_name = video_path.split('/')[-1]
 
-    cap = cv2.VideoCapture(video_path)
+    cap = skvideo.io.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
