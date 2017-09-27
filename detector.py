@@ -80,11 +80,36 @@ class Util(object):
         x2 = int(h * 670 / 848)
         return x1, y1, x2, y2
 
-    def crop_skill_1(image, size):
+    def rect_middle_hero(image):
+        w = image.shape[0]
+        h = image.shape[1]
+        y1 = int(w * 190 / 480)
+        y2 = int(w * 300 / 480)
+        x1 = int(h * 390 / 848)
+        x2 = int(h * 460 / 848)
+        return x1, y1, x2, y2
+
+    def shape_skill_1():
+        return (50, 50, 3)
+
+    def size_skill_1():
+        return (50, 50)
+
+    def shape_middle_hero():
+        return (90, 70, 3)
+
+    def size_middle_hero():
+        return (70, 90)
+
+    def crop_skill_1(image):
         x1, y1, x2, y2 = Util.rect_skill_1(image)
         image = image[y1:y2, x1:x2]
-        return cv2.resize(image, size)
+        return cv2.resize(image, Util.size_skill_1())
 
+    def crop_middle_hero(image):
+        x1, y1, x2, y2 = Util.rect_middle_hero(image)
+        image = image[y1:y2, x1:x2]
+        return cv2.resize(image, Util.size_middle_hero())
 
 class Model(object):
     def cnn_5_layer(input_shape, n_labels):
@@ -394,7 +419,7 @@ class HeroDetect(object):
         super(HeroDetect, self).__init__()
         self.output_dir = './data/output'
 
-        self.input_shape = (self.image_width, self.image_height, self.image_channels) = input_shape
+        self.input_shape = (self.image_height, self.image_width, self.image_channels) = input_shape
         self.image_size = (self.image_width, self.image_height)
         
     def load_model(self, model_path, label_path):
@@ -508,7 +533,7 @@ class HeroDetect(object):
         return sorted(zip(self.labels, y), reverse=True, key=lambda x:x[1])[0]
 
     def predict_frame(self, frame):
-        return self.predict_image(Util.crop_skill_1(frame, self.image_size))
+        return self.predict_image(Util.crop_skill_1(frame))
 
     def predict_video(self, video_path):
         cap = VideoCapture(video_path)
@@ -559,7 +584,7 @@ class HeroDetect(object):
         acc = hit / n
         print('acc: {} @ {}'.format(acc, test_dir))
 
-def train():
+def train_skill():
     for model_init in [\
         # Model.cnn_5_layer,
         # Model.cnn_7_layer,
@@ -571,7 +596,7 @@ def train():
         Model.cnn_vgg_dropout,
         ]:
         for i in range(1):
-            heroDetect = HeroDetect(input_shape=(50, 50, 3))
+            heroDetect = HeroDetect(input_shape=Util.shape_skill_1())
             heroDetect.train(
                 ver='v2.{}.iter{}'.format(model_init.__name__, i), 
                 train_dir='./data/input/train',
@@ -581,8 +606,8 @@ def train():
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
                 )
 
-def test():
-    heroDetect = HeroDetect(input_shape=(50, 50, 3))
+def test_skill():
+    heroDetect = HeroDetect(input_shape=Util.shape_skill_1())
     heroDetect.load_model(
         model_path='./model/v1.cnn_vgg_dropout.iter0.model.h5',
         # model_path='./data/model/v1.cnn_vgg_dropout.iter0.model.h5', 
@@ -590,6 +615,29 @@ def test():
     test_dir = './data/input/test_small'
     heroDetect.print_test_result(test_dir, verbose=True)
 
+def train_hero():
+    for model_init in [\
+        # Model.cnn_5_layer,
+        # Model.cnn_7_layer,
+        # Model.cnn_10_layer, 
+        # Model.cnn_13_layer, 
+        # Model.cnn_13_layer_dropout, 
+        # Model.cnn_15_layer,
+        # Model.cnn_vgg,
+        Model.cnn_vgg_dropout,
+        ]:
+        for i in range(2):
+            heroDetect = HeroDetect(input_shape=Util.shape_middle_hero())
+            heroDetect.train(
+                ver='v1.{}.iter{}'.format(model_init.__name__, i), 
+                train_dir='./data/input/train_hero',
+                model_init=model_init, 
+                epochs=100, 
+                batch_size=500,
+                optimizer=keras.optimizers.Adadelta(lr=1e-1),
+                )
+
 if __name__ == '__main__':
-    # train()
-    test()
+    # train_skill()
+    # test_skill()
+    train_hero()
