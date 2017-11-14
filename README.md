@@ -35,4 +35,4 @@ python3 demo_frame.py
 python3 demo_player.py
 ```
 
-![demo_player](./data/img/demo_player.png)
+![demo_player](./img/demo_player.png)
