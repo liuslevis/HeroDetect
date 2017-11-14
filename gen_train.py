@@ -45,16 +45,17 @@ def gen_train(video_path, train_dir, crop_func):
             # break
 
 def main():
-    input_dir = './data/raw'
-    output_dir = './data/input/train_hero/'
+    input_dir = './data/raw_new'
+    output_dir = './data/input/train_skill_1/'
+    crop_func = Util.crop_skill_1
+    # crop_func = Util.crop_middle_hero
     for root_dir, sub_dirs, files in os.walk(input_dir):
         for file in files:
             if '.mp4' in file:
                 video_path = root_dir + '/' + file
                 train_dir = output_dir + os.path.basename(root_dir)
                 print('processing', video_path, '->', train_dir)
-                # gen_train(video_path, train_dir, crop_func=Util.crop_skill_1)
-                gen_train(video_path, train_dir, crop_func=Util.crop_middle_hero)
+                gen_train(video_path, train_dir, crop_func)
 
 if __name__ == '__main__':
     main()

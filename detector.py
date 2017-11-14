@@ -599,7 +599,7 @@ def train_skill():
             heroDetect = HeroDetect(input_shape=Util.shape_skill_1())
             heroDetect.train(
                 ver='v2.{}.iter{}'.format(model_init.__name__, i), 
-                train_dir='./data/input/train',
+                train_dir='./data/input/train_skill_1',
                 model_init=model_init, 
                 epochs=100, 
                 batch_size=500,
