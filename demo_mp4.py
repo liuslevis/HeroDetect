@@ -17,7 +17,9 @@ heroDetect.load_model(
 # video_path = './data/raw_test/bailishouyue/q0532r8l8bq.p712.1.mp4'
 # video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
 # video_path = './data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
-video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
+# video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
+video_path = './data/raw_test/1.mp4'
+
 cap = VideoCapture(video_path)
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 i_frame = 0
@@ -43,6 +45,7 @@ def need_cut(i_sec):
     return False
 
 def kill_info(i_sec):
+    return []
     info = [(18, 2),
         (27, 3),
         (44, 2),
@@ -105,7 +108,8 @@ while key != 120: # press x to stop
         fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
         fontScale=.8,
         color=color, 
-        thickness=2)
+        thickness=2,
+        )
 
     x1, y1, x2, y2 = Util.rect_kill_info(frame)
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
@@ -116,7 +120,7 @@ while key != 120: # press x to stop
         fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
         fontScale=.8,
         color=color, 
-        thickness=2
+        thickness=2,
         )
 
     if DEBUG:

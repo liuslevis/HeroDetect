@@ -16,7 +16,9 @@ heroDetect.load_model(
 # video_path = './data/raw_test/bailishouyue/q0532r8l8bq.p712.1.mp4'
 # video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
 # video_path = './data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
-video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
+# video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
+video_path = './data/raw_test/1.mp4'
+
 cap = VideoCapture(video_path)
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 count = 0
