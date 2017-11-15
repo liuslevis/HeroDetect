@@ -89,16 +89,22 @@ class Util(object):
         x2 = int(h * 460 / 848)
         return x1, y1, x2, y2
 
+    def rect_grid_hero(image, i, j):
+        x1, y1, x2, y2 = Util.rect_middle_hero(image)
+        dx = i * (x2 - x1)
+        dy = j * (y2 - y1)
+        return x1 + dx, y1 + dy, x2 + dx, y2 + dy
+
     def shape_skill_1():
         return (50, 50, 3)
 
     def size_skill_1():
         return (50, 50)
 
-    def shape_middle_hero():
+    def shape_hero():
         return (90, 70, 3)
 
-    def size_middle_hero():
+    def size_hero():
         return (70, 90)
 
     def crop_skill_1(image):
@@ -109,7 +115,12 @@ class Util(object):
     def crop_middle_hero(image):
         x1, y1, x2, y2 = Util.rect_middle_hero(image)
         image = image[y1:y2, x1:x2]
-        return cv2.resize(image, Util.size_middle_hero())
+        return cv2.resize(image, Util.size_hero())
+
+    def crop_grid_hero(image, i, j):
+        x1, y1, x2, y2 = Util.rect_grid_hero(image, i, j)
+        image = image[y1:y2, x1:x2]
+        return cv2.resize(image, Util.size_hero())
 
 class Model(object):
     def cnn_5_layer(input_shape, n_labels):
@@ -623,17 +634,17 @@ def train_hero():
         # Model.cnn_13_layer, 
         # Model.cnn_13_layer_dropout, 
         # Model.cnn_15_layer,
-        # Model.cnn_vgg,
+        Model.cnn_vgg,
         Model.cnn_vgg_dropout,
         ]:
         for i in range(2):
-            heroDetect = HeroDetect(input_shape=Util.shape_middle_hero())
+            heroDetect = HeroDetect(input_shape=Util.shape_hero())
             heroDetect.train(
-                ver='v1.{}.iter{}'.format(model_init.__name__, i), 
+                ver='v1.hero.{}.iter{}'.format(model_init.__name__, i), 
                 train_dir='./data/input/train_hero',
                 model_init=model_init, 
                 epochs=100, 
-                batch_size=500,
+                batch_size=256,
                 optimizer=keras.optimizers.Adadelta(lr=1e-1),
                 )
 
