@@ -469,7 +469,7 @@ class HeroDetect(object):
         n = len(paths)
         y = np.ndarray((n, 1))
         for i, path in enumerate(paths):
-            hero = path.split('/')[-2]
+            hero = os.path.split(os.path.split(path)[-2])[-1]
             y[i] = labels.index(hero)
         return to_categorical(y)
 
