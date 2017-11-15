@@ -1,5 +1,5 @@
 import os
-train_dir = './data/input/train'
+train_dir = './data/input/train_hero'
 for base, dirs, files in os.walk(train_dir):
     if base != train_dir:
         print(len(files), base)
