@@ -11,12 +11,12 @@ from cv2 import VideoCapture
 # if __name__ == '__main__':
 heroDetect = HeroDetect(input_shape=Util.shape_hero())
 heroDetect.load_model(
-    model_path='./model/v1.hero.cnn_vgg.iter0.model.h5', 
-    label_path='./model/v1.hero.cnn_vgg.iter0.label.txt')
+    model_path='./model/v4.hero.cnn_vgg_dropout.iter0.model.h5', 
+    label_path='./model/v4.hero.cnn_vgg_dropout.iter0.label.txt')
 
 # video_path = './data/raw_test/bailishouyue/q0532r8l8bq.p712.1.mp4'
-# video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
-video_path = './data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
+video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
+# video_path = './data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
 # video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
 # video_path = './data/raw_test/1.mp4'
 
