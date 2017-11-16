@@ -38,7 +38,8 @@ while key != 120: # press x to stop
     count += 1
     if count % int(sample_sec * fps) == 0 and count / fps > begin_sec:
         # windows = [(i, -1) for i in range(-3,5)] + [(i, 0) for i in range(-4,5)] + [(i, 1) for i in range(-4,4)]       
-        windows = itertools.product(range(-3,4), range(-1,2))
+        # windows = itrtools.product(range(-3,4), range(-1,2))
+        windows = [(0, 0)]
         for i, j in windows:
             text_coord = '%d,%d' % (i,j)
             x1, y1, x2, y2 = Util.rect_grid_hero(frame, i, j)
@@ -55,7 +56,7 @@ while key != 120: # press x to stop
             image = Util.crop_grid_hero(frame, i, j)
             label, prob = heroDetect.predict_image(image)
             votes.setdefault((i,j), deque([], maxlen=1))
-            votes[(i, j)].append(label if prob > 0.2 else 'NA')
+            votes[(i, j)].append(label if prob > 0.5 else 'NA')
 
             most_common = Counter(votes[(i, j)]).most_common(n=1)[0] # ('hero', 0.2)
             text_vote = '%s %d' % (most_common[0], most_common[1]) 
