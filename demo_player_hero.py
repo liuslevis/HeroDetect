@@ -11,19 +11,21 @@ from cv2 import VideoCapture
 # if __name__ == '__main__':
 heroDetect = HeroDetect(input_shape=Util.shape_hero())
 heroDetect.load_model(
-    model_path='./model/v4.hero.cnn_vgg_dropout.iter0.model.h5', 
-    label_path='./model/v4.hero.cnn_vgg_dropout.iter0.label.txt')
+    model_path='./model/v5.hero.cnn_vgg_dropout.iter0.model.h5', 
+    label_path='./model/v5.hero.cnn_vgg_dropout.iter0.label.txt')
 
 # video_path = './data/raw_test/bailishouyue/q0532r8l8bq.p712.1.mp4'
-video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
+# video_path = './data/raw_test/liubang/k0391sd2c3j.p712.1.mp4'
 # video_path = './data/raw_test/huamulan/y0382qw3lsj.p712.1.mp4'
 # video_path = './data/raw_test/random/d055299tzgr.p712.1.mp4'
 # video_path = './data/raw_test/1.mp4'
+video_path = './data/raw_test/zhuangzhou/s0535trpsob.p712.1.mp4'
 
 cap = VideoCapture(video_path)
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 count = 0
-sample_sec = 10
+sample_sec = 1
+begin_sec = 60
 votes = {} # {(i,j):deque([label], maxlen=10)}
 color = (0, 255, 0)
 
@@ -34,9 +36,9 @@ while key != 120: # press x to stop
         break
     # display key frame ervery n second
     count += 1
-    if count % int(sample_sec * fps) == 0:
-        windows = [(i, -1) for i in range(-3,5)] + [(i, 0) for i in range(-4,5)] + [(i, 1) for i in range(-4,4)]       
-        # windows = itertools.poduct(range(-3,4), range(-1,2))
+    if count % int(sample_sec * fps) == 0 and count / fps > begin_sec:
+        # windows = [(i, -1) for i in range(-3,5)] + [(i, 0) for i in range(-4,5)] + [(i, 1) for i in range(-4,4)]       
+        windows = itertools.product(range(-3,4), range(-1,2))
         for i, j in windows:
             text_coord = '%d,%d' % (i,j)
             x1, y1, x2, y2 = Util.rect_grid_hero(frame, i, j)
@@ -53,7 +55,7 @@ while key != 120: # press x to stop
             image = Util.crop_grid_hero(frame, i, j)
             label, prob = heroDetect.predict_image(image)
             votes.setdefault((i,j), deque([], maxlen=1))
-            votes[(i, j)].append(label if prob > 0.1 else 'NA')
+            votes[(i, j)].append(label if prob > 0.2 else 'NA')
 
             most_common = Counter(votes[(i, j)]).most_common(n=1)[0] # ('hero', 0.2)
             text_vote = '%s %d' % (most_common[0], most_common[1]) 
@@ -69,7 +71,7 @@ while key != 120: # press x to stop
             if i == j == 0:
                 print('debug label, prob:', label, prob)
 
-        print('votes:', votes)
+        # print('votes:', votes)
 
         cv2.imshow(' Press "x" to close window. Press anykey to next frame.', frame)
         key = cv2.waitKey(0)
